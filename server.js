@@ -172,6 +172,89 @@ app.post('/api/members', async (req, res) => {
   }
 });
 
+// --- LINE notification ---
+const DAYS = ['土', '日', '月', '火', '水', '木', '金'];
+
+function buildWeekMessage(members, schedules, weekKey) {
+  const sat = new Date(weekKey + 'T00:00:00');
+  const lines = ['🍚 今週の夕食スケジュール', ''];
+
+  for (let i = 0; i < DAYS.length; i++) {
+    const d = new Date(sat);
+    d.setDate(d.getDate() + i);
+    const dateStr = `${d.getMonth() + 1}/${d.getDate()}`;
+
+    const statuses = members.map(m => {
+      const sched = schedules[m];
+      const dayData = sched ? sched[DAYS[i]] : null;
+      const dinner = dayData ? dayData.dinner : null;
+      const memo = dayData && dayData.memo ? ` (${dayData.memo})` : '';
+      if (dinner === 'yes') return `  ✅ ${m}${memo}`;
+      if (dinner === 'no') return `  ❌ ${m}${memo}`;
+      return `  ❓ ${m}（未入力）`;
+    });
+
+    const needCount = members.filter(m => {
+      const sched = schedules[m];
+      const dayData = sched ? sched[DAYS[i]] : null;
+      return dayData && dayData.dinner === 'yes';
+    }).length;
+
+    lines.push(`【${DAYS[i]} ${dateStr}】 ${needCount}人`);
+    lines.push(...statuses);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+async function sendLineMessage(text) {
+  const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  const groupId = process.env.LINE_GROUP_ID;
+  if (!token || !groupId) {
+    console.error('LINE credentials not configured');
+    return false;
+  }
+
+  const res = await fetch('https://api.line.me/v2/bot/message/push', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      to: groupId,
+      messages: [{ type: 'text', text }]
+    })
+  });
+
+  if (!res.ok) {
+    console.error('LINE API error:', res.status, await res.text());
+    return false;
+  }
+  return true;
+}
+
+app.post('/api/notify', async (req, res) => {
+  try {
+    const secret = req.headers['x-notify-secret'];
+    if (process.env.NOTIFY_SECRET && secret !== process.env.NOTIFY_SECRET) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const weekKey = getWeekKey(new Date());
+    const members = await storage.getMembers();
+    const schedules = await storage.getWeek(weekKey);
+    const message = buildWeekMessage(members, schedules, weekKey);
+    const sent = await sendLineMessage(message);
+
+    res.json({ ok: sent, message: sent ? 'Sent' : 'Failed to send' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // --- Start ---
 (async () => {
   await storage.init();
