@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>家族スケジュール</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍚</text></svg>">
+  <style>
+    :root {
+      --primary: #4A90D9;
+      --primary-light: #EBF3FB;
+      --danger: #E74C3C;
+      --success: #27AE60;
+      --warning: #F39C12;
+      --gray-50: #F8F9FA;
+      --gray-100: #F1F3F5;
+      --gray-200: #E9ECEF;
+      --gray-300: #DEE2E6;
+      --gray-400: #CED4DA;
+      --gray-500: #ADB5BD;
+      --gray-700: #495057;
+      --gray-900: #212529;
+      --radius: 12px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', Meiryo, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      min-height: 100dvh;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), #357ABD);
+      color: white;
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(74,144,217,0.3);
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .settings-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .week-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 12px 20px;
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .week-nav button {
+      background: var(--gray-100);
+      border: 1px solid var(--gray-300);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-700);
+    }
+
+    .week-nav button:active { background: var(--gray-200); }
+
+    .week-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-700);
+      min-width: 180px;
+      text-align: center;
+    }
+
+    .tab-bar {
+      display: flex;
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-bar button {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 8px;
+      border: none;
+      background: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-500);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-bar button.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      font-weight: 700;
+    }
+
+    .main-content {
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* === Dashboard View === */
+    .dinner-summary {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .dinner-summary-title {
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dinner-day {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .dinner-day:last-child { border-bottom: none; }
+
+    .dinner-day-name {
+      font-size: 14px;
+      font-weight: 600;
+      width: 50px;
+      flex-shrink: 0;
+    }
+
+    .dinner-day-name.is-today {
+      color: var(--primary);
+    }
+
+    .dinner-day-date {
+      font-size: 11px;
+      color: var(--gray-500);
+      width: 50px;
+      flex-shrink: 0;
+    }
+
+    .dinner-avatars {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+      flex-wrap: wrap;
+    }
+
+    .dinner-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .dinner-avatar.needs { background: var(--success); }
+    .dinner-avatar.no-need { background: var(--gray-400); text-decoration: line-through; opacity: 0.5; }
+    .dinner-avatar.unknown { background: var(--warning); }
+
+    .dinner-count {
+      font-size: 22px;
+      font-weight: 800;
+      width: 48px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .dinner-count .unit {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--gray-500);
+    }
+
+    /* === Input View === */
+    .input-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .input-card-header {
+      padding: 14px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .input-day {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .input-day:last-child { border-bottom: none; }
+
+    .input-day-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .input-day-label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .input-day-label.is-today {
+      color: var(--primary);
+    }
+
+    .input-day-date {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
+    .dinner-toggle {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dinner-toggle button {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 2px solid var(--gray-300);
+      background: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dinner-toggle button.selected-yes {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .dinner-toggle button.selected-no {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: white;
+    }
+
+    .memo-input {
+      width: 100%;
+      margin-top: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .memo-input:focus {
+      border-color: var(--primary);
+    }
+
+    .memo-input::placeholder {
+      color: var(--gray-400);
+    }
+
+    .save-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary), #357ABD);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(74,144,217,0.3);
+      transition: transform 0.1s;
+    }
+
+    .save-btn:active {
+      transform: scale(0.98);
+    }
+
+    .save-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--gray-900);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 200;
+    }
+
+    .save-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* === Detail View === */
+    .detail-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .detail-card-header {
+      padding: 12px 16px;
+      font-weight: 700;
+      font-size: 14px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detail-card-header.is-today {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .detail-member {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      gap: 10px;
+    }
+
+    .detail-member:last-child { border-bottom: none; }
+
+    .detail-member-name {
+      font-size: 14px;
+      font-weight: 600;
+      width: 50px;
+    }
+
+    .detail-dinner-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .detail-dinner-badge.yes { background: #E8F5E9; color: var(--success); }
+    .detail-dinner-badge.no { background: #FFEBEE; color: var(--danger); }
+    .detail-dinner-badge.unknown { background: #FFF8E1; color: var(--warning); }
+
+    .detail-memo {
+      font-size: 12px;
+      color: var(--gray-700);
+      flex: 1;
+      text-align: right;
+    }
+
+    /* === Settings Modal === */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 400px;
+      padding: 24px;
+    }
+
+    .modal h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .modal label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+
+    .modal input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      margin-bottom: 12px;
+      outline: none;
+    }
+
+    .modal input:focus { border-color: var(--primary); }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .modal-actions .cancel-btn {
+      background: var(--gray-200);
+      color: var(--gray-700);
+    }
+
+    .modal-actions .confirm-btn {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      padding: 8px;
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .legend-dot.yes { background: var(--success); }
+    .legend-dot.no { background: var(--gray-400); }
+    .legend-dot.unknown { background: var(--warning); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-actions">
+    <h1>🍚 夕食スケジュール</h1>
+    <button class="settings-btn" onclick="openSettings()">⚙</button>
+  </div>
+</header>
+
+<div class="week-nav">
+  <button onclick="changeWeek(-1)">◀</button>
+  <span class="week-label" id="weekLabel"></span>
+  <button onclick="changeWeek(1)">▶</button>
+</div>
+
+<div class="tab-bar" id="tabBar"></div>
+
+<div class="main-content" id="mainContent"></div>
+
+<div class="save-toast" id="toast"></div>
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h2>家族メンバー設定</h2>
+    <div id="memberInputs"></div>
+    <div class="modal-actions">
+      <button class="cancel-btn" onclick="closeSettings()">キャンセル</button>
+      <button class="confirm-btn" onclick="saveSettings()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DAYS = ['土', '日', '月', '火', '水', '木', '金'];
+const COLORS = ['#4A90D9', '#E74C3C', '#27AE60', '#9B59B6', '#F39C12', '#1ABC9C', '#E67E22', '#3498DB'];
+
+let state = {
+  members: [],
+  weekKey: '',
+  schedules: {},
+  currentTab: 'dashboard',
+  currentMember: null
+};
+
+function getWeekSaturday(offset = 0) {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = (day + 1) % 7;
+  d.setDate(d.getDate() - diff + (offset * 7));
+  return d.toISOString().slice(0, 10);
+}
+
+let weekOffset = 0;
+
+async function loadWeek() {
+  const weekKey = getWeekSaturday(weekOffset);
+  const res = await fetch(`/api/week?week=${weekKey}`);
+  const data = await res.json();
+  state.members = data.members;
+  state.weekKey = data.weekKey;
+  state.schedules = data.schedules;
+  updateWeekLabel();
+  renderTabs();
+  renderView();
+}
+
+function updateWeekLabel() {
+  const sat = new Date(state.weekKey + 'T00:00:00');
+  const fri = new Date(sat);
+  fri.setDate(fri.getDate() + 6);
+  const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+  document.getElementById('weekLabel').textContent = `${fmt(sat)}(土) 〜 ${fmt(fri)}(金)`;
+}
+
+function changeWeek(dir) {
+  weekOffset += dir;
+  loadWeek();
+}
+
+function getDayDates() {
+  const sat = new Date(state.weekKey + 'T00:00:00');
+  return DAYS.map((name, i) => {
+    const d = new Date(sat);
+    d.setDate(d.getDate() + i);
+    return { name, date: d, dateStr: `${d.getMonth()+1}/${d.getDate()}` };
+  });
+}
+
+function isToday(date) {
+  const today = new Date();
+  return date.getFullYear() === today.getFullYear() &&
+         date.getMonth() === today.getMonth() &&
+         date.getDate() === today.getDate();
+}
+
+function renderTabs() {
+  const bar = document.getElementById('tabBar');
+  const tabs = [
+    { id: 'dashboard', label: '一覧' },
+    ...state.members.map(m => ({ id: `input-${m}`, label: m, member: m })),
+    { id: 'detail', label: '詳細' }
+  ];
+
+  bar.innerHTML = tabs.map(t =>
+    `<button class="${state.currentTab === t.id ? 'active' : ''}" onclick="switchTab('${t.id}', ${t.member ? `'${t.member}'` : 'null'})">${t.label}</button>`
+  ).join('');
+}
+
+function switchTab(tabId, member) {
+  state.currentTab = tabId;
+  state.currentMember = member;
+  if (tabId.startsWith('input-')) {
+    initTempSchedule();
+  }
+  renderTabs();
+  renderView();
+}
+
+function renderView() {
+  const container = document.getElementById('mainContent');
+  if (state.currentTab === 'dashboard') {
+    container.innerHTML = renderDashboard();
+  } else if (state.currentTab === 'detail') {
+    container.innerHTML = renderDetail();
+  } else {
+    container.innerHTML = renderInput();
+  }
+}
+
+function getMemberColor(index) {
+  return COLORS[index % COLORS.length];
+}
+
+function renderDashboard() {
+  const days = getDayDates();
+
+  const rows = days.map(day => {
+    let needCount = 0;
+    const avatars = state.members.map((m, mi) => {
+      const sched = state.schedules[m];
+      const dayData = sched ? sched[day.name] : null;
+      const dinner = dayData ? dayData.dinner : null;
+
+      let cls = 'unknown';
+      if (dinner === 'yes') { cls = 'needs'; needCount++; }
+      else if (dinner === 'no') { cls = 'no-need'; }
+      else { cls = 'unknown'; }
+
+      const initial = m.charAt(0);
+      const bgStyle = cls === 'needs' ? `background:${getMemberColor(mi)}` :
+                      cls === 'no-need' ? '' : '';
+
+      return `<span class="dinner-avatar ${cls}" style="${bgStyle}" title="${m}">${initial}</span>`;
+    }).join('');
+
+    const todayClass = isToday(day.date) ? 'is-today' : '';
+
+    return `
+      <div class="dinner-day">
+        <span class="dinner-day-name ${todayClass}">${day.name}</span>
+        <span class="dinner-day-date">${day.dateStr}</span>
+        <span class="dinner-avatars">${avatars}</span>
+        <span class="dinner-count">${needCount}<span class="unit">人</span></span>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="dinner-summary">
+      <div class="dinner-summary-title">🍽 夕食が必要な人数</div>
+      ${rows}
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot yes"></span>要</span>
+      <span class="legend-item"><span class="legend-dot no"></span>不要</span>
+      <span class="legend-item"><span class="legend-dot unknown"></span>未入力</span>
+    </div>`;
+}
+
+function renderInput() {
+  const member = state.currentMember;
+  const days = getDayDates();
+  const sched = tempSchedule;
+
+  const rows = days.map(day => {
+    const dayData = sched[day.name] || {};
+    const dinner = dayData.dinner || '';
+    const memo = dayData.memo || '';
+    const todayClass = isToday(day.date) ? 'is-today' : '';
+
+    return `
+      <div class="input-day">
+        <div class="input-day-header">
+          <span class="input-day-label ${todayClass}">${day.name} ${day.dateStr}</span>
+          <div class="dinner-toggle">
+            <button class="${dinner === 'yes' ? 'selected-yes' : ''}"
+                    onclick="setDinner('${day.name}', 'yes')">要</button>
+            <button class="${dinner === 'no' ? 'selected-no' : ''}"
+                    onclick="setDinner('${day.name}', 'no')">不要</button>
+          </div>
+        </div>
+        <textarea class="memo-input" rows="1" placeholder="メモ（残業、飲み会など）"
+                  data-day="${day.name}" oninput="setMemo('${day.name}', this.value)">${memo}</textarea>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="input-card">
+      <div class="input-card-header">
+        <span>${member}の予定</span>
+        <button style="background:none;border:none;font-size:13px;color:var(--primary);cursor:pointer;font-weight:600" onclick="fillAll('yes')">全て「要」</button>
+      </div>
+      ${rows}
+    </div>
+    <button class="save-btn" onclick="saveSchedule()">保存する</button>`;
+}
+
+function renderDetail() {
+  const days = getDayDates();
+
+  return days.map(day => {
+    const todayClass = isToday(day.date) ? 'is-today' : '';
+
+    const members = state.members.map(m => {
+      const sched = state.schedules[m];
+      const dayData = sched ? sched[day.name] : null;
+      const dinner = dayData ? dayData.dinner : null;
+      const memo = dayData ? (dayData.memo || '') : '';
+
+      let badgeClass = 'unknown';
+      let badgeText = '未入力';
+      if (dinner === 'yes') { badgeClass = 'yes'; badgeText = '要'; }
+      else if (dinner === 'no') { badgeClass = 'no'; badgeText = '不要'; }
+
+      return `
+        <div class="detail-member">
+          <span class="detail-member-name">${m}</span>
+          <span class="detail-dinner-badge ${badgeClass}">${badgeText}</span>
+          <span class="detail-memo">${memo}</span>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="detail-card">
+        <div class="detail-card-header ${todayClass}">
+          ${day.name} ${day.dateStr}
+        </div>
+        ${members}
+      </div>`;
+  }).join('');
+}
+
+// Input helpers
+let tempSchedule = {};
+
+function initTempSchedule() {
+  const member = state.currentMember;
+  tempSchedule = JSON.parse(JSON.stringify(state.schedules[member] || {}));
+}
+
+function setDinner(day, value) {
+  if (!tempSchedule[day]) tempSchedule[day] = {};
+  if (tempSchedule[day].dinner === value) {
+    tempSchedule[day].dinner = '';
+  } else {
+    tempSchedule[day].dinner = value;
+  }
+  renderView();
+}
+
+function setMemo(day, value) {
+  if (!tempSchedule[day]) tempSchedule[day] = {};
+  tempSchedule[day].memo = value;
+}
+
+function fillAll(value) {
+  DAYS.forEach(day => {
+    if (!tempSchedule[day]) tempSchedule[day] = {};
+    tempSchedule[day].dinner = value;
+  });
+  renderView();
+}
+
+async function saveSchedule() {
+  const res = await fetch('/api/schedule', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      weekKey: state.weekKey,
+      member: state.currentMember,
+      schedules: tempSchedule
+    })
+  });
+
+  if (res.ok) {
+    state.schedules[state.currentMember] = JSON.parse(JSON.stringify(tempSchedule));
+    showToast('保存しました！');
+  }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// Settings
+function openSettings() {
+  const container = document.getElementById('memberInputs');
+  container.innerHTML = state.members.map((m, i) =>
+    `<label>メンバー${i + 1}</label>
+     <input type="text" value="${m}" id="member-${i}" />`
+  ).join('') +
+  `<button style="width:100%;padding:8px;margin-top:4px;border:1px dashed var(--gray-400);background:none;border-radius:8px;cursor:pointer;color:var(--gray-500);font-size:13px" onclick="addMemberInput()">+ メンバー追加</button>`;
+  document.getElementById('settingsModal').classList.add('show');
+}
+
+function addMemberInput() {
+  const container = document.getElementById('memberInputs');
+  const count = container.querySelectorAll('input').length;
+  const label = document.createElement('label');
+  label.textContent = `メンバー${count + 1}`;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.id = `member-${count}`;
+  input.placeholder = '名前を入力';
+  const addBtn = container.querySelector('button');
+  container.insertBefore(label, addBtn);
+  container.insertBefore(input, addBtn);
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('show');
+}
+
+async function saveSettings() {
+  const inputs = document.querySelectorAll('#memberInputs input');
+  const members = Array.from(inputs).map(i => i.value.trim()).filter(v => v);
+  if (members.length === 0) return;
+
+  const res = await fetch('/api/members', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ members })
+  });
+
+  if (res.ok) {
+    closeSettings();
+    loadWeek();
+    showToast('メンバーを更新しました');
+  }
+}
+
+function initTempSchedule() {
+  const member = state.currentMember;
+  tempSchedule = JSON.parse(JSON.stringify(state.schedules[member] || {}));
+}
+
+loadWeek();
+</script>
+</body>
+</html>
