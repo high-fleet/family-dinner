@@ -172,6 +172,19 @@ app.post('/api/members', async (req, res) => {
   }
 });
 
+// --- LINE webhook (for group ID capture) ---
+app.post('/api/webhook', (req, res) => {
+  const events = req.body.events || [];
+  for (const event of events) {
+    if (event.source && event.source.groupId) {
+      console.log('=== LINE GROUP ID ===');
+      console.log(event.source.groupId);
+      console.log('====================');
+    }
+  }
+  res.json({ ok: true });
+});
+
 // --- LINE notification ---
 const DAYS = ['土', '日', '月', '火', '水', '木', '金'];
 
