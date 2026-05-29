@@ -173,16 +173,21 @@ app.post('/api/members', async (req, res) => {
 });
 
 // --- LINE webhook (for group ID capture) ---
+let capturedGroupId = null;
+
 app.post('/api/webhook', (req, res) => {
   const events = req.body.events || [];
   for (const event of events) {
     if (event.source && event.source.groupId) {
-      console.log('=== LINE GROUP ID ===');
-      console.log(event.source.groupId);
-      console.log('====================');
+      capturedGroupId = event.source.groupId;
+      console.log('=== LINE GROUP ID: ' + capturedGroupId + ' ===');
     }
   }
   res.json({ ok: true });
+});
+
+app.get('/api/group-id', (req, res) => {
+  res.json({ groupId: capturedGroupId });
 });
 
 // --- LINE notification ---
