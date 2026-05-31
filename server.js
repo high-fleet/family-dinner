@@ -169,6 +169,19 @@ app.post('/api/schedule', async (req, res) => {
     }
     await storage.setSchedule(weekKey, member, schedules);
     res.json({ ok: true });
+
+    // LINE通知（レスポンス後に非同期で送信）
+    try {
+      const days = Object.entries(schedules)
+        .map(([day, data]) => {
+          const dinner = data.dinner === 'yes' ? '✅要' : data.dinner === 'no' ? '❌不要' : '❓未定';
+          const memo = data.memo ? ` (${data.memo})` : '';
+          return `  ${day}: ${dinner}${memo}`;
+        }).join('\n');
+      await sendLineMessage(`📝 ${member}が予定を更新しました\n\n${days}`);
+    } catch (e) {
+      console.error('LINE notify error:', e.message);
+    }
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Server error' });
