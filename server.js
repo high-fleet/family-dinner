@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const { generateWeeklyPlan, buildMenuMessage, buildShoppingMessage } = require('./menu-planner');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -192,6 +193,23 @@ app.post('/api/schedule', async (req, res) => {
       if (completedMembers.length === allMembers.length) {
         const summary = buildWeekMessage(allMembers, allSchedules, weekKey);
         await sendLineMessage(`🎉 全員の入力が完了しました！\n\n${summary}`);
+
+        // メニュー提案＋買い物リスト生成
+        const dinnerCounts = {};
+        for (const day of DAYS) {
+          dinnerCounts[day] = allMembers.filter(m => {
+            const s = allSchedules[m];
+            return s && s[day] && s[day].dinner === 'yes';
+          }).length;
+        }
+
+        // 月1特別メニュー判定（月初の週）
+        const now = new Date();
+        const isSpecialWeek = now.getDate() <= 7;
+
+        const plan = generateWeeklyPlan(dinnerCounts, isSpecialWeek);
+        await sendLineMessage(buildMenuMessage(plan));
+        await sendLineMessage(buildShoppingMessage(plan));
       }
     } catch (e) {
       console.error('LINE notify error:', e.message);
@@ -262,9 +280,43 @@ app.post('/api/webhook', async (req, res) => {
           }
           lines.push('', `👨‍👩‍👧‍👦 ${needCount}人分`);
           await replyLineMessage(replyToken, lines.join('\n'));
+        } else if (text === '献立' || text === 'メニュー') {
+          const weekKey = getWeekKey(new Date());
+          const members = await storage.getMembers();
+          const schedules = await storage.getWeek(weekKey);
+
+          const dinnerCounts = {};
+          for (const d of DAYS) {
+            dinnerCounts[d] = members.filter(m => {
+              const s = schedules[m];
+              return s && s[d] && s[d].dinner === 'yes';
+            }).length;
+          }
+
+          const now = new Date();
+          const isSpecialWeek = now.getDate() <= 7;
+          const plan = generateWeeklyPlan(dinnerCounts, isSpecialWeek);
+          await replyLineMessage(replyToken, buildMenuMessage(plan));
+        } else if (text === '買い物' || text === '買い物リスト') {
+          const weekKey = getWeekKey(new Date());
+          const members = await storage.getMembers();
+          const schedules = await storage.getWeek(weekKey);
+
+          const dinnerCounts = {};
+          for (const d of DAYS) {
+            dinnerCounts[d] = members.filter(m => {
+              const s = schedules[m];
+              return s && s[d] && s[d].dinner === 'yes';
+            }).length;
+          }
+
+          const now = new Date();
+          const isSpecialWeek = now.getDate() <= 7;
+          const plan = generateWeeklyPlan(dinnerCounts, isSpecialWeek);
+          await replyLineMessage(replyToken, buildShoppingMessage(plan));
         } else if (text === 'ヘルプ' || text === 'help') {
           await replyLineMessage(replyToken,
-            '📖 使い方\n\n「今日」→ 今日の夕食状況\n「今週」→ 今週のまとめ\n「予定」→ 今週のまとめ\n「ヘルプ」→ この説明'
+            '📖 使い方\n\n「今日」→ 今日の夕食状況\n「今週」→ 今週のまとめ\n「献立」→ メニュー提案\n「買い物」→ 買い物リスト\n「ヘルプ」→ この説明'
           );
         }
       } catch (e) {
