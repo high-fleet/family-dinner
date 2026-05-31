@@ -179,6 +179,20 @@ app.post('/api/schedule', async (req, res) => {
           return `  ${day}: ${dinner}${memo}`;
         }).join('\n');
       await sendLineMessage(`📝 ${member}が予定を更新しました\n\n${days}`);
+
+      // 全員入力完了チェック
+      const allMembers = await storage.getMembers();
+      const allSchedules = await storage.getWeek(weekKey);
+      const completedMembers = allMembers.filter(m => {
+        const s = allSchedules[m];
+        if (!s) return false;
+        return DAYS.every(day => s[day] && (s[day].dinner === 'yes' || s[day].dinner === 'no'));
+      });
+
+      if (completedMembers.length === allMembers.length) {
+        const summary = buildWeekMessage(allMembers, allSchedules, weekKey);
+        await sendLineMessage(`🎉 全員の入力が完了しました！\n\n${summary}`);
+      }
     } catch (e) {
       console.error('LINE notify error:', e.message);
     }
