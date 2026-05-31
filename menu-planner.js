@@ -20,6 +20,16 @@ const RECIPES = {
         { name: '玉ねぎ', perPerson: 0.5, unit: '個', category: 'vegetable' },
         { name: 'カレールー', perPerson: 1, unit: '皿分', category: 'sauce' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '米を研いで炊飯器にセット',
+        '野菜を一口大に切る（じゃがいも・にんじん・玉ねぎ）',
+        '鍋に油を熱し、豚肉を炒める',
+        '玉ねぎを加えて透き通るまで炒める',
+        'にんじん・じゃがいもを加えて軽く炒める',
+        '水を加えて中火で20分煮る（アクを取る）',
+        '火を止めてカレールーを溶かし入れる',
+        'とろみがつくまで弱火で10分煮込む',
       ]
     },
     {
@@ -33,6 +43,14 @@ const RECIPES = {
         { name: 'トマト', perPerson: 0.25, unit: '個', category: 'vegetable' },
         { name: '片栗粉', perPerson: 15, unit: 'g', category: 'staple' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '鶏もも肉を一口大に切る',
+        'しょうゆ・酒・おろし生姜・おろしにんにくで下味をつけ15分漬ける',
+        '片栗粉をまぶす',
+        '170℃の油で4〜5分揚げる',
+        '一度取り出して3分休ませ、180℃で1〜2分二度揚げ',
+        'キャベツ・レタス・トマトを添えて盛り付け',
       ]
     },
     {
@@ -45,6 +63,14 @@ const RECIPES = {
         { name: 'ゆで卵', perPerson: 1, unit: '個', category: 'other' },
         { name: 'ほうれん草（付け合わせ）', perPerson: 50, unit: 'g', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '豚バラブロックを3〜4cm角に切る',
+        'フライパンで全面に焼き色をつける',
+        '鍋に移し、水・酒・砂糖・しょうゆ・ネギの青い部分を入れる',
+        '落とし蓋をして弱火で60分煮込む',
+        'ゆで卵を作り、煮汁に漬ける',
+        'ほうれん草を茹でて添える',
       ]
     },
     {
@@ -59,6 +85,15 @@ const RECIPES = {
         { name: 'キャベツ（付け合わせ）', perPerson: 50, unit: 'g', category: 'vegetable' },
         { name: 'トマト', perPerson: 0.25, unit: '個', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '玉ねぎをみじん切りにし、レンジ600Wで2分加熱して冷ます',
+        'ひき肉・玉ねぎ・パン粉・卵・塩こしょうを混ぜてよくこねる',
+        '小判型に成形し、中央をくぼませる',
+        'フライパンに油を熱し、強火で片面2分焼く',
+        '裏返して蓋をし、弱火で8分蒸し焼き',
+        'ケチャップ・ウスターソース・水を煮詰めてソースにする',
+        'キャベツ・トマトを添えて盛り付け',
       ]
     },
     {
@@ -71,6 +106,14 @@ const RECIPES = {
         { name: '玉ねぎ', perPerson: 0.25, unit: '個', category: 'vegetable' },
         { name: 'キャベツ（付け合わせ）', perPerson: 50, unit: 'g', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '鶏むね肉をそぎ切りにし、塩こしょうで下味',
+        '小麦粉をまぶし、溶き卵にくぐらせる',
+        '170℃の油で4〜5分揚げる',
+        '甘酢だれ（酢・砂糖・しょうゆ各大さじ2）を作る',
+        '揚げたてを甘酢だれに漬ける',
+        'タルタルソース（ゆで卵・玉ねぎみじん切り・マヨネーズ）をかける',
       ]
     },
     {
@@ -84,6 +127,15 @@ const RECIPES = {
         { name: '餃子の皮', perPerson: 10, unit: '枚', category: 'staple' },
         { name: 'ネギ', perPerson: 0.15, unit: '本', category: 'vegetable' },
         { name: '米', perPerson: 0.5, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'キャベツをみじん切りにし、塩もみして水気を絞る',
+        'ニラ・ネギをみじん切りにする',
+        'ひき肉・野菜・しょうゆ・ごま油・おろし生姜を混ぜる',
+        '皮に餡をのせて包む',
+        'フライパンに油を熱し、餃子を並べて中火で2分焼く',
+        '水を餃子の高さ1/3まで入れ、蓋をして5分蒸し焼き',
+        '蓋を取り、水分を飛ばしてパリッと仕上げる',
       ]
     },
     {
@@ -96,6 +148,12 @@ const RECIPES = {
         { name: '味噌汁用豆腐', perPerson: 50, unit: 'g', category: 'other' },
         { name: 'ネギ', perPerson: 0.1, unit: '本', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '刺身を冷蔵庫から出し、皿に盛り付ける',
+        '大根をつまにして添える',
+        '味噌汁を作る（豆腐・ネギ）',
+        'ご飯を盛って完成',
       ]
     },
   ],
@@ -111,6 +169,14 @@ const RECIPES = {
         { name: '玉ねぎ', perPerson: 0.25, unit: '個', category: 'vegetable' },
         { name: 'キャベツ（付け合わせ）', perPerson: 50, unit: 'g', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'キャベツを千切りにして皿に盛る',
+        '玉ねぎを薄切りにする',
+        'タレを作る（しょうゆ・酒・みりん各大さじ2、おろし生姜小さじ1）',
+        'フライパンに油を熱し、豚肉を広げて焼く',
+        '玉ねぎを加えてしんなりするまで炒める',
+        'タレを回し入れ、絡めて完成',
       ]
     },
     {
@@ -122,6 +188,13 @@ const RECIPES = {
         { name: 'レタス', perPerson: 30, unit: 'g', category: 'vegetable' },
         { name: 'トマト', perPerson: 0.25, unit: '個', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '鶏もも肉の厚い部分を開いて均一にする',
+        'フライパンに皮目を下にして入れ、中火で5分焼く',
+        '裏返して3分焼く',
+        'しょうゆ・みりん・酒・砂糖各大さじ1を入れて煮絡める',
+        '食べやすく切り、レタス・トマトを添える',
       ]
     },
     {
@@ -133,6 +206,13 @@ const RECIPES = {
         { name: 'キムチ', perPerson: 50, unit: 'g', category: 'other' },
         { name: 'ニラ', perPerson: 20, unit: 'g', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'ニラを4〜5cm幅に切る',
+        'フライパンにごま油を熱し、豚肉を炒める',
+        '色が変わったらキムチを加えて炒める',
+        'ニラを加えてさっと炒め合わせる',
+        'しょうゆ少々で味を調える',
       ]
     },
     {
@@ -145,6 +225,14 @@ const RECIPES = {
         { name: '卵', perPerson: 1.5, unit: '個', category: 'other' },
         { name: 'ネギ', perPerson: 0.1, unit: '本', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '鶏もも肉を一口大に切る、玉ねぎを薄切りにする',
+        '鍋にだし汁・しょうゆ・みりん・砂糖を入れて煮立てる',
+        '玉ねぎと鶏肉を入れて中火で5分煮る',
+        '溶き卵の2/3を回し入れ、30秒待つ',
+        '残りの卵を回し入れ、半熟で火を止める',
+        'ご飯の上にのせ、ネギを散らす',
       ]
     },
     {
@@ -157,6 +245,13 @@ const RECIPES = {
         { name: 'にんじん', perPerson: 0.2, unit: '本', category: 'vegetable' },
         { name: 'しめじ', perPerson: 25, unit: 'g', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'キャベツをざく切り、にんじんを短冊切り、しめじをほぐす',
+        'フライパンに油を熱し、豚肉を炒める',
+        'にんじんを加えて1分炒める',
+        'キャベツ・しめじを加えて強火でさっと炒める',
+        '塩こしょう・鶏ガラスープの素で味付け',
       ]
     },
     {
@@ -168,6 +263,13 @@ const RECIPES = {
         { name: 'じゃがいも', perPerson: 0.5, unit: '個', category: 'vegetable' },
         { name: 'ほうれん草', perPerson: 40, unit: 'g', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '鶏むね肉をそぎ切りにし、塩こしょう・酒で下味',
+        'じゃがいもを薄切りにしてレンジ600Wで2分加熱',
+        'フライパンに油を熱し、鶏肉を皮目から中火で4分焼く',
+        '裏返して3分焼く',
+        'ほうれん草を茹でて添える',
       ]
     },
     {
@@ -179,6 +281,13 @@ const RECIPES = {
         { name: '卵', perPerson: 1, unit: '個', category: 'other' },
         { name: '小松菜', perPerson: 40, unit: 'g', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '鶏ひき肉をフライパンで炒め、しょうゆ・砂糖・みりん・おろし生姜で味付け',
+        '菜箸4本でポロポロになるまで炒り煮する',
+        '卵を溶き、砂糖少々を加えて炒り卵を作る',
+        '小松菜を茹でて3cm幅に切る',
+        'ご飯の上に肉そぼろ・炒り卵・小松菜を彩りよく盛る',
       ]
     },
     {
@@ -190,6 +299,14 @@ const RECIPES = {
         { name: 'ナス', perPerson: 1, unit: '本', category: 'vegetable' },
         { name: 'ネギ', perPerson: 0.15, unit: '本', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'ナスを乱切りにし、水にさらしてアク抜き',
+        '味噌だれを作る（味噌・砂糖・酒・みりん各大さじ1）',
+        'フライパンに多めの油を熱し、ナスを炒めて取り出す',
+        '豚肉を炒め、色が変わったらナスを戻す',
+        '味噌だれを加えて全体に絡める',
+        'ネギの小口切りを散らす',
       ]
     },
   ],
@@ -206,6 +323,12 @@ const RECIPES = {
         { name: 'ネギ', perPerson: 0.15, unit: '本', category: 'vegetable' },
         { name: 'Cook-Do 回鍋肉', perPerson: 0.25, unit: '箱', category: 'sauce' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'キャベツをざく切り、ネギを斜め切りにする',
+        'フライパンに油を熱し、豚バラ肉を炒める',
+        'キャベツ・ネギを加えて炒める',
+        'Cook-Doのソースを加えて全体に絡める',
       ]
     },
     {
@@ -218,6 +341,13 @@ const RECIPES = {
         { name: 'ネギ', perPerson: 0.1, unit: '本', category: 'vegetable' },
         { name: 'Cook-Do 麻婆豆腐', perPerson: 0.25, unit: '箱', category: 'sauce' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '豆腐をさいの目切りにする',
+        'フライパンに油を熱し、ひき肉を炒める',
+        'Cook-Doのソースと水を加えて煮立てる',
+        '豆腐を加えて2〜3分煮る',
+        'ネギの小口切りを散らす',
       ]
     },
     {
@@ -230,6 +360,12 @@ const RECIPES = {
         { name: 'たけのこ水煮', perPerson: 30, unit: 'g', category: 'vegetable' },
         { name: 'Cook-Do 青椒肉絲', perPerson: 0.25, unit: '箱', category: 'sauce' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'ピーマン・たけのこを細切りにする',
+        'フライパンに油を熱し、豚肉を炒める',
+        'ピーマン・たけのこを加えて炒める',
+        'Cook-Doのソースを加えて全体に絡める',
       ]
     },
     {
@@ -242,6 +378,12 @@ const RECIPES = {
         { name: 'ニラ', perPerson: 20, unit: 'g', category: 'vegetable' },
         { name: 'Cook-Do オイスターソース炒め', perPerson: 0.25, unit: '箱', category: 'sauce' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'ニラを4〜5cm幅に切る',
+        'フライパンに油を熱し、豚肉を炒める',
+        'もやし・ニラを加えて強火でさっと炒める',
+        'Cook-Doのソースを加えて全体に絡める',
       ]
     },
   ],
@@ -258,6 +400,13 @@ const RECIPES = {
         { name: 'ほうれん草（おひたし）', perPerson: 50, unit: 'g', category: 'vegetable' },
         { name: '味噌汁用豆腐', perPerson: 50, unit: 'g', category: 'other' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '鮭に軽く塩を振り、10分置いて水気を拭く',
+        'グリルを予熱し、中火で片面5分ずつ焼く',
+        '大根をおろす',
+        'ほうれん草を茹でて3cm幅に切り、しょうゆ・かつお節で和える',
+        '味噌汁を作る（豆腐・ネギ）',
       ]
     },
     {
@@ -269,6 +418,13 @@ const RECIPES = {
         { name: '大根おろし', perPerson: 50, unit: 'g', category: 'vegetable' },
         { name: '小松菜（おひたし）', perPerson: 50, unit: 'g', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'さばに塩を振り、10分置いて水気を拭く',
+        'グリルを予熱し、皮目を上にして中火で7分焼く',
+        '裏返して3分焼く',
+        '大根をおろす',
+        '小松菜を茹でて3cm幅に切り、しょうゆ・かつお節で和える',
       ]
     },
     {
@@ -280,6 +436,13 @@ const RECIPES = {
         { name: '大根おろし', perPerson: 50, unit: 'g', category: 'vegetable' },
         { name: 'きゅうり（酢の物）', perPerson: 0.5, unit: '本', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'グリルを予熱する',
+        'ほっけを身の面を上にして中火で5分焼く',
+        '裏返して皮目を5分焼く',
+        '大根をおろす',
+        'きゅうりを薄切りにし、塩もみして酢・砂糖で和える',
       ]
     },
   ],
@@ -295,6 +458,13 @@ const RECIPES = {
         { name: '玉ねぎ', perPerson: 0.5, unit: '個', category: 'vegetable' },
         { name: '卵', perPerson: 1, unit: '個', category: 'other' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        '玉ねぎを薄切りにする',
+        '鍋に水・しょうゆ・みりん・酒・砂糖・だしの素を煮立てる',
+        '玉ねぎを入れて中火で5分煮る',
+        '牛肉を加えてほぐしながら5分煮る（アクを取る）',
+        'ご飯の上に盛り、お好みで卵をのせる',
       ]
     },
     {
@@ -310,6 +480,15 @@ const RECIPES = {
         { name: 'ブロッコリー', perPerson: 30, unit: 'g', category: 'vegetable' },
         { name: 'ビーフシチュールー', perPerson: 1, unit: '皿分', category: 'sauce' },
         { name: 'パン', perPerson: 1, unit: '個', category: 'staple' },
+      ],
+      steps: [
+        '牛すね肉を大きめに切り、塩こしょうして小麦粉をまぶす',
+        '鍋に油を熱し、肉の全面に焼き色をつける',
+        '玉ねぎを加えて炒める',
+        '水を加え、沸騰したらアクを取り、弱火で40分煮る',
+        'にんじん・じゃがいもを加えて20分煮る',
+        '火を止めてルーを溶かし、とろみがつくまで10分煮込む',
+        'ブロッコリーを別茹でして添える',
       ]
     },
     {
@@ -323,6 +502,14 @@ const RECIPES = {
         { name: 'にんじん', perPerson: 0.3, unit: '本', category: 'vegetable' },
         { name: '糸こんにゃく', perPerson: 30, unit: 'g', category: 'other' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'じゃがいもを一口大、玉ねぎをくし切り、にんじんを乱切りにする',
+        '糸こんにゃくを食べやすく切り、下茹でする',
+        '鍋に油を熱し、牛肉を炒める',
+        '野菜を加えて軽く炒める',
+        'だし汁・しょうゆ・砂糖・酒・みりんを加える',
+        '落とし蓋をして中火で20分煮る',
       ]
     },
     {
@@ -334,6 +521,14 @@ const RECIPES = {
         { name: 'アスパラガス', perPerson: 2, unit: '本', category: 'vegetable' },
         { name: 'エリンギ', perPerson: 0.5, unit: '本', category: 'vegetable' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'アスパラの根元を切り落とし、斜め切りにする',
+        'エリンギを薄切りにする',
+        '牛肉に塩こしょう・酒・片栗粉で下味をつける',
+        'フライパンに油を熱し、牛肉を炒めて取り出す',
+        'アスパラ・エリンギを炒め、牛肉を戻す',
+        'オイスターソース・しょうゆ・酒で味付け',
       ]
     },
     {
@@ -346,6 +541,14 @@ const RECIPES = {
         { name: '木綿豆腐', perPerson: 75, unit: 'g', category: 'other' },
         { name: '卵', perPerson: 0.5, unit: '個', category: 'other' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
+      ],
+      steps: [
+        'ゴーヤを縦半分に切り、種とワタを取って薄切りにし、塩もみする',
+        '豆腐を水切りし、手でちぎる',
+        'フライパンに油を熱し、豆腐を焼き色がつくまで焼いて取り出す',
+        '豚肉を炒め、ゴーヤを加えて2分炒める',
+        '豆腐を戻し、しょうゆ・鶏ガラスープの素で味付け',
+        '溶き卵を回し入れ、さっと混ぜて完成',
       ]
     },
   ]
@@ -413,24 +616,19 @@ function generateWeeklyPlan(dinnerCounts, isSpecialWeek = false) {
     const available = (arr) => pickRandomExcluding(arr, usedNames);
 
     if (i === specialDayIndex) {
-      // 特別メニュー（牛肉等）
       const pool = available(RECIPES.special);
       const weekendOnly = pool.filter(r => r.forWeekend);
       recipe = pickRandom(weekendOnly.length > 0 && (i <= 1) ? weekendOnly : pool);
     } else if (i <= 1) {
-      // 週末
       const pool = available(RECIPES.weekend);
       recipe = pickRandom(pool);
     } else if (i === fishDayIndex) {
-      // 魚の日
       const pool = available(RECIPES.fish);
       recipe = pickRandom(pool);
     } else if (cookdoDays.includes(i)) {
-      // Cook-Do の日
       const pool = available(RECIPES.cookdo);
       recipe = pickRandom(pool);
     } else {
-      // 通常平日
       const pool = available(RECIPES.weekday);
       recipe = pickRandom(pool);
     }
@@ -440,7 +638,7 @@ function generateWeeklyPlan(dinnerCounts, isSpecialWeek = false) {
   }
 
   // === 買い物リスト生成 ===
-  const shoppingMap = {}; // { itemName: { total, unit, category, canFreeze, days: [] } }
+  const shoppingMap = {};
 
   for (const item of menu) {
     if (!item.recipe || item.count === 0) continue;
@@ -460,42 +658,26 @@ function generateWeeklyPlan(dinnerCounts, isSpecialWeek = false) {
     }
   }
 
-  // 飲料水を追加
   shoppingMap['飲料水（2L）'] = {
-    total: 6,
-    unit: '本',
-    category: 'other',
-    canFreeze: false,
-    days: []
+    total: 6, unit: '本', category: 'other', canFreeze: false, days: []
   };
 
-  // 数量を整理（端数を切り上げ）
   const shoppingList = Object.entries(shoppingMap).map(([name, info]) => {
     let total = info.total;
-    // g単位は10g刻み、それ以外は0.5刻みで切り上げ
     if (info.unit === 'g') {
       total = Math.ceil(total / 10) * 10;
     } else if (info.unit === '合' || info.unit === '皿分') {
       total = Math.ceil(total);
     } else {
-      total = Math.ceil(total * 2) / 2; // 0.5刻み
+      total = Math.ceil(total * 2) / 2;
     }
 
-    // 冷凍メモ: 土日以外に使う肉・魚は冷凍
     const needsFreeze = info.canFreeze &&
       info.days.some(d => !['土', '日'].includes(d));
 
-    return {
-      name,
-      total,
-      unit: info.unit,
-      category: info.category,
-      needsFreeze,
-      days: info.days
-    };
+    return { name, total, unit: info.unit, category: info.category, needsFreeze, days: info.days };
   });
 
-  // カテゴリ順にソート
   const categoryOrder = { meat: 0, fish: 1, vegetable: 2, staple: 3, sauce: 4, other: 5 };
   shoppingList.sort((a, b) => (categoryOrder[a.category] || 9) - (categoryOrder[b.category] || 9));
 
@@ -521,12 +703,8 @@ function buildMenuMessage(plan) {
 
 function buildShoppingMessage(plan) {
   const categoryLabels = {
-    meat: '🥩 肉類',
-    fish: '🐟 魚介類',
-    vegetable: '🥬 野菜',
-    staple: '🍚 主食・粉類',
-    sauce: '🫙 調味料・タレ',
-    other: '📦 その他'
+    meat: '🥩 肉類', fish: '🐟 魚介類', vegetable: '🥬 野菜',
+    staple: '🍚 主食・粉類', sauce: '🫙 調味料・タレ', other: '📦 その他'
   };
 
   const lines = ['🛒 買い物リスト（1週間分）', ''];
@@ -547,4 +725,32 @@ function buildShoppingMessage(plan) {
   return lines.join('\n');
 }
 
-module.exports = { generateWeeklyPlan, buildMenuMessage, buildShoppingMessage };
+function buildRecipeMessage(dayLabel, recipe, count) {
+  if (!recipe) return `【${dayLabel}】は夕食なしです`;
+
+  const lines = [
+    `👨‍🍳 ${recipe.name}のレシピ（${count}人分）`,
+    `⏱ 調理時間: ${recipe.time}分`,
+    '',
+    '【材料】'
+  ];
+
+  for (const ing of recipe.ingredients) {
+    let amount = ing.perPerson * count;
+    if (ing.unit === 'g') {
+      amount = Math.ceil(amount / 10) * 10;
+    } else {
+      amount = Math.ceil(amount * 2) / 2;
+    }
+    lines.push(`  ${ing.name}: ${amount}${ing.unit}`);
+  }
+
+  lines.push('', '【作り方】');
+  recipe.steps.forEach((step, i) => {
+    lines.push(`  ${i + 1}. ${step}`);
+  });
+
+  return lines.join('\n');
+}
+
+module.exports = { generateWeeklyPlan, buildMenuMessage, buildShoppingMessage, buildRecipeMessage };

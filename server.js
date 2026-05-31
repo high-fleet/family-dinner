@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const { generateWeeklyPlan, buildMenuMessage, buildShoppingMessage } = require('./menu-planner');
+const { generateWeeklyPlan, buildMenuMessage, buildShoppingMessage, buildRecipeMessage } = require('./menu-planner');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,6 +42,14 @@ if (process.env.DATABASE_URL) {
         dinner TEXT DEFAULT '',
         memo TEXT DEFAULT '',
         UNIQUE(week_key, member, day)
+      )
+    `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS menu_plans (
+        id SERIAL PRIMARY KEY,
+        week_key TEXT NOT NULL UNIQUE,
+        plan_json TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
       )
     `);
     const { rows } = await pool.query('SELECT COUNT(*) as cnt FROM members');
@@ -95,6 +103,20 @@ if (process.env.DATABASE_URL) {
       } finally {
         client.release();
       }
+    },
+    savePlan: async (weekKey, plan) => {
+      await pool.query(`
+        INSERT INTO menu_plans (week_key, plan_json)
+        VALUES ($1, $2)
+        ON CONFLICT (week_key)
+        DO UPDATE SET plan_json = $2, created_at = NOW()
+      `, [weekKey, JSON.stringify(plan)]);
+    },
+    getPlan: async (weekKey) => {
+      const { rows } = await pool.query(
+        'SELECT plan_json FROM menu_plans WHERE week_key = $1', [weekKey]
+      );
+      return rows.length > 0 ? JSON.parse(rows[0].plan_json) : null;
     }
   };
 } else {
@@ -136,6 +158,16 @@ if (process.env.DATABASE_URL) {
       if (!data.weeks[weekKey]) data.weeks[weekKey] = {};
       data.weeks[weekKey][member] = daySchedules;
       writeData(data);
+    },
+    savePlan: async (weekKey, plan) => {
+      const data = readData();
+      if (!data.plans) data.plans = {};
+      data.plans[weekKey] = plan;
+      writeData(data);
+    },
+    getPlan: async (weekKey) => {
+      const data = readData();
+      return (data.plans && data.plans[weekKey]) || null;
     }
   };
 }
@@ -208,6 +240,7 @@ app.post('/api/schedule', async (req, res) => {
         const isSpecialWeek = now.getDate() <= 7;
 
         const plan = generateWeeklyPlan(dinnerCounts, isSpecialWeek);
+        await storage.savePlan(weekKey, plan);
         await sendLineMessage(buildMenuMessage(plan));
         await sendLineMessage(buildShoppingMessage(plan));
       }
@@ -282,41 +315,53 @@ app.post('/api/webhook', async (req, res) => {
           await replyLineMessage(replyToken, lines.join('\n'));
         } else if (text === '献立' || text === 'メニュー') {
           const weekKey = getWeekKey(new Date());
-          const members = await storage.getMembers();
-          const schedules = await storage.getWeek(weekKey);
-
-          const dinnerCounts = {};
-          for (const d of DAYS) {
-            dinnerCounts[d] = members.filter(m => {
-              const s = schedules[m];
-              return s && s[d] && s[d].dinner === 'yes';
-            }).length;
+          const plan = await storage.getPlan(weekKey);
+          if (plan) {
+            await replyLineMessage(replyToken, buildMenuMessage(plan));
+          } else {
+            await replyLineMessage(replyToken, 'まだ今週の献立が作成されていません。全員の入力が完了すると自動生成されます。');
           }
-
-          const now = new Date();
-          const isSpecialWeek = now.getDate() <= 7;
-          const plan = generateWeeklyPlan(dinnerCounts, isSpecialWeek);
-          await replyLineMessage(replyToken, buildMenuMessage(plan));
         } else if (text === '買い物' || text === '買い物リスト') {
           const weekKey = getWeekKey(new Date());
-          const members = await storage.getMembers();
-          const schedules = await storage.getWeek(weekKey);
-
-          const dinnerCounts = {};
-          for (const d of DAYS) {
-            dinnerCounts[d] = members.filter(m => {
-              const s = schedules[m];
-              return s && s[d] && s[d].dinner === 'yes';
-            }).length;
+          const plan = await storage.getPlan(weekKey);
+          if (plan) {
+            await replyLineMessage(replyToken, buildShoppingMessage(plan));
+          } else {
+            await replyLineMessage(replyToken, 'まだ今週の買い物リストが作成されていません。全員の入力が完了すると自動生成されます。');
           }
-
-          const now = new Date();
-          const isSpecialWeek = now.getDate() <= 7;
-          const plan = generateWeeklyPlan(dinnerCounts, isSpecialWeek);
-          await replyLineMessage(replyToken, buildShoppingMessage(plan));
+        } else if (text === 'レシピ' || text === '今日のレシピ') {
+          const weekKey = getWeekKey(new Date());
+          const plan = await storage.getPlan(weekKey);
+          if (!plan) {
+            await replyLineMessage(replyToken, 'まだ今週の献立が作成されていません。');
+          } else {
+            const today = new Date();
+            const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+            const todayName = dayNames[today.getDay()];
+            const item = plan.menu.find(m => m.day === todayName);
+            if (item && item.recipe) {
+              await replyLineMessage(replyToken, buildRecipeMessage(todayName, item.recipe, item.count));
+            } else {
+              await replyLineMessage(replyToken, `今日（${todayName}）は夕食なしです。`);
+            }
+          }
+        } else if (/^(土|日|月|火|水|木|金)(曜)?のレシピ$/.test(text)) {
+          const dayName = text.charAt(0);
+          const weekKey = getWeekKey(new Date());
+          const plan = await storage.getPlan(weekKey);
+          if (!plan) {
+            await replyLineMessage(replyToken, 'まだ今週の献立が作成されていません。');
+          } else {
+            const item = plan.menu.find(m => m.day === dayName);
+            if (item && item.recipe) {
+              await replyLineMessage(replyToken, buildRecipeMessage(dayName, item.recipe, item.count));
+            } else {
+              await replyLineMessage(replyToken, `${dayName}曜は夕食なしです。`);
+            }
+          }
         } else if (text === 'ヘルプ' || text === 'help') {
           await replyLineMessage(replyToken,
-            '📖 使い方\n\n「今日」→ 今日の夕食状況\n「今週」→ 今週のまとめ\n「献立」→ メニュー提案\n「買い物」→ 買い物リスト\n「ヘルプ」→ この説明'
+            '📖 使い方\n\n「今日」→ 今日の夕食状況\n「今週」→ 今週のまとめ\n「献立」→ 今週の献立\n「買い物」→ 買い物リスト\n「レシピ」→ 今日のレシピ\n「○曜のレシピ」→ 指定日のレシピ\n「ヘルプ」→ この説明'
           );
         }
       } catch (e) {
