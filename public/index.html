@@ -802,27 +802,39 @@ function fillAll(value) {
 }
 
 async function saveSchedule() {
-  const res = await fetch('/api/schedule', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      weekKey: state.weekKey,
-      member: state.currentMember,
-      schedules: tempSchedule
-    })
-  });
+  try {
+    const res = await fetch('/api/schedule', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        weekKey: state.weekKey,
+        member: state.currentMember,
+        schedules: tempSchedule
+      })
+    });
 
-  if (res.ok) {
-    state.schedules[state.currentMember] = JSON.parse(JSON.stringify(tempSchedule));
-    showToast('保存しました！');
+    if (res.ok) {
+      // 保存後にサーバーから最新データを再取得して確認
+      const verify = await fetch(`/api/week?week=${state.weekKey}`);
+      if (verify.ok) {
+        const data = await verify.json();
+        state.schedules = data.schedules;
+      }
+      showToast('保存しました！');
+    } else {
+      showToast('保存に失敗しました。もう一度お試しください。', true);
+    }
+  } catch (e) {
+    showToast('通信エラー。ページを再読み込みしてください。', true);
   }
 }
 
-function showToast(msg) {
+function showToast(msg, isError = false) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
+  toast.style.background = isError ? 'var(--danger)' : 'var(--gray-900)';
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2000);
+  setTimeout(() => toast.classList.remove('show'), isError ? 4000 : 2000);
 }
 
 // Settings

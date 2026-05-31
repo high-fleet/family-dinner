@@ -14,7 +14,14 @@ if (process.env.DATABASE_URL) {
   const { Pool } = require('pg');
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: { rejectUnauthorized: false },
+    connectionTimeoutMillis: 10000,
+    idleTimeoutMillis: 30000,
+    max: 5
+  });
+
+  pool.on('error', (err) => {
+    console.error('Unexpected pool error:', err.message);
   });
 
   async function initDB() {
@@ -69,13 +76,23 @@ if (process.env.DATABASE_URL) {
       return schedules;
     },
     setSchedule: async (weekKey, member, daySchedules) => {
-      for (const [day, data] of Object.entries(daySchedules)) {
-        await pool.query(`
-          INSERT INTO schedules (week_key, member, day, dinner, memo)
-          VALUES ($1, $2, $3, $4, $5)
-          ON CONFLICT (week_key, member, day)
-          DO UPDATE SET dinner = $4, memo = $5
-        `, [weekKey, member, day, data.dinner || '', data.memo || '']);
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+        for (const [day, data] of Object.entries(daySchedules)) {
+          await client.query(`
+            INSERT INTO schedules (week_key, member, day, dinner, memo)
+            VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT (week_key, member, day)
+            DO UPDATE SET dinner = $4, memo = $5
+          `, [weekKey, member, day, data.dinner || '', data.memo || '']);
+        }
+        await client.query('COMMIT');
+      } catch (e) {
+        await client.query('ROLLBACK');
+        throw e;
+      } finally {
+        client.release();
       }
     }
   };
