@@ -2,6 +2,9 @@
 // 各材料: { name, perPerson: 1人分の量, unit, category, canFreeze }
 // category: meat, fish, vegetable, staple, sauce, other
 // canFreeze: 冷凍可能かどうか
+//
+// ⚠ アレルギー除外: エビ・カニ（甲殻類）、ナッツ類（カシューナッツ、ヘーゼルナッツ、ピスタチオ）
+// これらを含むレシピ・食材は使用しないこと
 
 const RECIPES = {
   // --- 週末向け（時間をかけてOK）---
@@ -84,11 +87,11 @@ const RECIPES = {
       ]
     },
     {
-      name: '刺身盛り合わせ',
+      name: '刺身盛り合わせ（エビ・カニ抜き）',
       meat: 'fish',
       time: 10,
       ingredients: [
-        { name: '刺身盛り合わせ', perPerson: 100, unit: 'g', category: 'fish' },
+        { name: '刺身盛り合わせ（エビ・カニ抜き）', perPerson: 100, unit: 'g', category: 'fish' },
         { name: '大根（つま）', perPerson: 30, unit: 'g', category: 'vegetable' },
         { name: '味噌汁用豆腐', perPerson: 50, unit: 'g', category: 'other' },
         { name: 'ネギ', perPerson: 0.1, unit: '本', category: 'vegetable' },
@@ -230,14 +233,14 @@ const RECIPES = {
       ]
     },
     {
-      name: 'エビチリ（Cook-Do）',
-      meat: 'other',
+      name: '豚肉ともやしのオイスター炒め（Cook-Do）',
+      meat: 'pork',
       time: 10,
       ingredients: [
-        { name: 'むきエビ', perPerson: 80, unit: 'g', category: 'fish', canFreeze: true },
-        { name: 'ネギ', perPerson: 0.1, unit: '本', category: 'vegetable' },
-        { name: 'レタス', perPerson: 30, unit: 'g', category: 'vegetable' },
-        { name: 'Cook-Do エビチリ', perPerson: 0.25, unit: '箱', category: 'sauce' },
+        { name: '豚こま切れ肉', perPerson: 100, unit: 'g', category: 'meat', canFreeze: true },
+        { name: 'もやし', perPerson: 50, unit: 'g', category: 'vegetable' },
+        { name: 'ニラ', perPerson: 20, unit: 'g', category: 'vegetable' },
+        { name: 'Cook-Do オイスターソース炒め', perPerson: 0.25, unit: '箱', category: 'sauce' },
         { name: '米', perPerson: 1, unit: '合', category: 'staple' },
       ]
     },
