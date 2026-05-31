@@ -241,8 +241,8 @@ app.post('/api/schedule', async (req, res) => {
 
         const plan = generateWeeklyPlan(dinnerCounts, isSpecialWeek);
         await storage.savePlan(weekKey, plan);
-        await sendLineMessage(buildMenuMessage(plan));
-        await sendLineMessage(buildShoppingMessage(plan));
+        await sendLineMessageToParents(buildMenuMessage(plan));
+        await sendLineMessageToParents(buildShoppingMessage(plan));
       }
     } catch (e) {
       console.error('LINE notify error:', e.message);
@@ -434,10 +434,9 @@ async function replyLineMessage(replyToken, text) {
   return true;
 }
 
-async function sendLineMessage(text) {
+async function sendLineMessageTo(targetGroupId, text) {
   const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-  const groupId = process.env.LINE_GROUP_ID;
-  if (!token || !groupId) {
+  if (!token || !targetGroupId) {
     console.error('LINE credentials not configured');
     return false;
   }
@@ -449,7 +448,7 @@ async function sendLineMessage(text) {
       'Authorization': `Bearer ${token}`
     },
     body: JSON.stringify({
-      to: groupId,
+      to: targetGroupId,
       messages: [{ type: 'text', text }]
     })
   });
@@ -459,6 +458,16 @@ async function sendLineMessage(text) {
     return false;
   }
   return true;
+}
+
+// 家族グループへ送信
+async function sendLineMessage(text) {
+  return sendLineMessageTo(process.env.LINE_GROUP_ID, text);
+}
+
+// 親グループへ送信
+async function sendLineMessageToParents(text) {
+  return sendLineMessageTo(process.env.LINE_PARENT_GROUP_ID, text);
 }
 
 app.post('/api/notify', async (req, res) => {
