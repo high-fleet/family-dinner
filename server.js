@@ -219,15 +219,59 @@ app.post('/api/members', async (req, res) => {
 // --- LINE webhook (for group ID capture) ---
 let capturedGroupId = null;
 
-app.post('/api/webhook', (req, res) => {
+app.post('/api/webhook', async (req, res) => {
+  res.json({ ok: true });
+
   const events = req.body.events || [];
   for (const event of events) {
     if (event.source && event.source.groupId) {
       capturedGroupId = event.source.groupId;
-      console.log('=== LINE GROUP ID: ' + capturedGroupId + ' ===');
+    }
+
+    // テキストメッセージへの返信
+    if (event.type === 'message' && event.message.type === 'text') {
+      const text = event.message.text.trim();
+      const replyToken = event.replyToken;
+
+      try {
+        if (text === '今週' || text === 'まとめ' || text === '予定') {
+          const weekKey = getWeekKey(new Date());
+          const members = await storage.getMembers();
+          const schedules = await storage.getWeek(weekKey);
+          const message = buildWeekMessage(members, schedules, weekKey);
+          await replyLineMessage(replyToken, message);
+        } else if (text === '今日') {
+          const weekKey = getWeekKey(new Date());
+          const members = await storage.getMembers();
+          const schedules = await storage.getWeek(weekKey);
+          const today = new Date();
+          const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+          const todayName = dayNames[today.getDay()];
+          const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
+
+          let needCount = 0;
+          const lines = [`🍚 今日（${todayName} ${dateStr}）の夕食`, ''];
+          for (const m of members) {
+            const s = schedules[m];
+            const dayData = s ? s[todayName] : null;
+            const dinner = dayData ? dayData.dinner : null;
+            const memo = dayData && dayData.memo ? ` (${dayData.memo})` : '';
+            if (dinner === 'yes') { lines.push(`  ✅ ${m}${memo}`); needCount++; }
+            else if (dinner === 'no') { lines.push(`  ❌ ${m}${memo}`); }
+            else { lines.push(`  ❓ ${m}（未入力）`); }
+          }
+          lines.push('', `👨‍👩‍👧‍👦 ${needCount}人分`);
+          await replyLineMessage(replyToken, lines.join('\n'));
+        } else if (text === 'ヘルプ' || text === 'help') {
+          await replyLineMessage(replyToken,
+            '📖 使い方\n\n「今日」→ 今日の夕食状況\n「今週」→ 今週のまとめ\n「予定」→ 今週のまとめ\n「ヘルプ」→ この説明'
+          );
+        }
+      } catch (e) {
+        console.error('Reply error:', e.message);
+      }
     }
   }
-  res.json({ ok: true });
 });
 
 app.get('/api/group-id', (req, res) => {
@@ -268,6 +312,29 @@ function buildWeekMessage(members, schedules, weekKey) {
   }
 
   return lines.join('\n');
+}
+
+async function replyLineMessage(replyToken, text) {
+  const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  if (!token) return false;
+
+  const res = await fetch('https://api.line.me/v2/bot/message/reply', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      replyToken,
+      messages: [{ type: 'text', text }]
+    })
+  });
+
+  if (!res.ok) {
+    console.error('LINE reply error:', res.status, await res.text());
+    return false;
+  }
+  return true;
 }
 
 async function sendLineMessage(text) {
