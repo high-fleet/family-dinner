@@ -283,6 +283,8 @@ app.post('/api/webhook', async (req, res) => {
     if (event.type === 'message' && event.message.type === 'text') {
       const text = event.message.text.trim();
       const replyToken = event.replyToken;
+      const sourceGroupId = event.source && event.source.groupId;
+      const isParentGroup = sourceGroupId === process.env.LINE_PARENT_GROUP_ID;
 
       try {
         if (text === '今週' || text === 'まとめ' || text === '予定') {
@@ -313,7 +315,7 @@ app.post('/api/webhook', async (req, res) => {
           }
           lines.push('', `👨‍👩‍👧‍👦 ${needCount}人分`);
           await replyLineMessage(replyToken, lines.join('\n'));
-        } else if (text === '献立' || text === 'メニュー') {
+        } else if ((text === '献立' || text === 'メニュー') && isParentGroup) {
           const weekKey = getWeekKey(new Date());
           const plan = await storage.getPlan(weekKey);
           if (plan) {
@@ -321,7 +323,7 @@ app.post('/api/webhook', async (req, res) => {
           } else {
             await replyLineMessage(replyToken, 'まだ今週の献立が作成されていません。全員の入力が完了すると自動生成されます。');
           }
-        } else if (text === '買い物' || text === '買い物リスト') {
+        } else if ((text === '買い物' || text === '買い物リスト') && isParentGroup) {
           const weekKey = getWeekKey(new Date());
           const plan = await storage.getPlan(weekKey);
           if (plan) {
@@ -329,7 +331,7 @@ app.post('/api/webhook', async (req, res) => {
           } else {
             await replyLineMessage(replyToken, 'まだ今週の買い物リストが作成されていません。全員の入力が完了すると自動生成されます。');
           }
-        } else if (text === 'レシピ' || text === '今日のレシピ') {
+        } else if ((text === 'レシピ' || text === '今日のレシピ') && isParentGroup) {
           const weekKey = getWeekKey(new Date());
           const plan = await storage.getPlan(weekKey);
           if (!plan) {
@@ -345,7 +347,7 @@ app.post('/api/webhook', async (req, res) => {
               await replyLineMessage(replyToken, `今日（${todayName}）は夕食なしです。`);
             }
           }
-        } else if (/^(土|日|月|火|水|木|金)(曜)?のレシピ$/.test(text)) {
+        } else if (/^(土|日|月|火|水|木|金)(曜)?のレシピ$/.test(text) && isParentGroup) {
           const dayName = text.charAt(0);
           const weekKey = getWeekKey(new Date());
           const plan = await storage.getPlan(weekKey);
@@ -360,9 +362,15 @@ app.post('/api/webhook', async (req, res) => {
             }
           }
         } else if (text === 'ヘルプ' || text === 'help') {
-          await replyLineMessage(replyToken,
-            '📖 使い方\n\n「今日」→ 今日の夕食状況\n「今週」→ 今週のまとめ\n「献立」→ 今週の献立\n「買い物」→ 買い物リスト\n「レシピ」→ 今日のレシピ\n「○曜のレシピ」→ 指定日のレシピ\n「ヘルプ」→ この説明'
-          );
+          if (isParentGroup) {
+            await replyLineMessage(replyToken,
+              '📖 使い方（親グループ）\n\n「今日」→ 今日の夕食状況\n「今週」→ 今週のまとめ\n「献立」→ 今週の献立\n「買い物」→ 買い物リスト\n「レシピ」→ 今日のレシピ\n「○曜のレシピ」→ 指定日のレシピ\n「ヘルプ」→ この説明\n\n📌 献立・買い物リストはこのグループにのみ通知されます'
+            );
+          } else {
+            await replyLineMessage(replyToken,
+              '📖 使い方\n\n「今日」→ 今日の夕食状況\n「今週」→ 今週のまとめ\n「ヘルプ」→ この説明\n\n📌 予定の入力はWebアプリから行えます'
+            );
+          }
         }
       } catch (e) {
         console.error('Reply error:', e.message);
