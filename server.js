@@ -172,13 +172,22 @@ if (process.env.DATABASE_URL) {
   };
 }
 
-// --- Week key calculation ---
+// --- Week key calculation (JST) ---
+function toJST(date) {
+  return new Date(date.getTime() + 9 * 60 * 60 * 1000);
+}
+
+function formatDateJST(date) {
+  const jst = toJST(date);
+  return jst.toISOString().slice(0, 10);
+}
+
 function getWeekKey(date) {
-  const d = new Date(date);
-  const day = d.getDay();
+  const jst = toJST(new Date(date));
+  const day = jst.getUTCDay();
   const diff = (day + 1) % 7;
-  d.setDate(d.getDate() - diff);
-  return d.toISOString().slice(0, 10);
+  jst.setUTCDate(jst.getUTCDate() - diff);
+  return jst.toISOString().slice(0, 10);
 }
 
 // --- Routes ---
@@ -236,8 +245,8 @@ app.post('/api/schedule', async (req, res) => {
         }
 
         // 月1特別メニュー判定（月初の週）
-        const now = new Date();
-        const isSpecialWeek = now.getDate() <= 7;
+        const nowJST = toJST(new Date());
+        const isSpecialWeek = nowJST.getUTCDate() <= 7;
 
         const plan = generateWeeklyPlan(dinnerCounts, isSpecialWeek);
         await storage.savePlan(weekKey, plan);
@@ -297,10 +306,10 @@ app.post('/api/webhook', async (req, res) => {
           const weekKey = getWeekKey(new Date());
           const members = await storage.getMembers();
           const schedules = await storage.getWeek(weekKey);
-          const today = new Date();
+          const todayJST = toJST(new Date());
           const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
-          const todayName = dayNames[today.getDay()];
-          const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
+          const todayName = dayNames[todayJST.getUTCDay()];
+          const dateStr = `${todayJST.getUTCMonth() + 1}/${todayJST.getUTCDate()}`;
 
           let needCount = 0;
           const lines = [`🍚 今日（${todayName} ${dateStr}）の夕食`, ''];
@@ -337,9 +346,9 @@ app.post('/api/webhook', async (req, res) => {
           if (!plan) {
             await replyLineMessage(replyToken, 'まだ今週の献立が作成されていません。');
           } else {
-            const today = new Date();
+            const todayJST = toJST(new Date());
             const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
-            const todayName = dayNames[today.getDay()];
+            const todayName = dayNames[todayJST.getUTCDay()];
             const item = plan.menu.find(m => m.day === todayName);
             if (item && item.recipe) {
               await replyLineMessage(replyToken, buildRecipeMessage(todayName, item.recipe, item.count));
@@ -387,7 +396,7 @@ app.get('/api/group-id', (req, res) => {
 const DAYS = ['土', '日', '月', '火', '水', '木', '金'];
 
 function buildWeekMessage(members, schedules, weekKey) {
-  const sat = new Date(weekKey + 'T00:00:00');
+  const sat = new Date(weekKey + 'T00:00:00+09:00');
   const lines = ['🍚 今週の夕食スケジュール', ''];
 
   for (let i = 0; i < DAYS.length; i++) {

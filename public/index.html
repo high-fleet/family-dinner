@@ -563,12 +563,19 @@ let state = {
   currentMember: null
 };
 
+function toLocalDateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function getWeekSaturday(offset = 0) {
   const d = new Date();
   const day = d.getDay();
   const diff = (day + 1) % 7;
   d.setDate(d.getDate() - diff + (offset * 7));
-  return d.toISOString().slice(0, 10);
+  return toLocalDateStr(d);
 }
 
 let weekOffset = 0;
