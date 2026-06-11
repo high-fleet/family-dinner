@@ -294,6 +294,7 @@ app.post('/api/webhook', async (req, res) => {
       const replyToken = event.replyToken;
       const sourceGroupId = event.source && event.source.groupId;
       const isParentGroup = sourceGroupId === process.env.LINE_PARENT_GROUP_ID;
+      console.log(`[webhook] text="${text}", groupId=${sourceGroupId}, isParent=${isParentGroup}, parentEnv=${process.env.LINE_PARENT_GROUP_ID}`);
 
       try {
         if (text === '今週' || text === 'まとめ' || text === '予定') {
@@ -356,8 +357,9 @@ app.post('/api/webhook', async (req, res) => {
               await replyLineMessage(replyToken, `今日（${todayName}）は夕食なしです。`);
             }
           }
-        } else if (/^(土|日|月|火|水|木|金)(曜)?のレシピ$/.test(text) && isParentGroup) {
+        } else if (/^(土|日|月|火|水|木|金)(曜日?)?のレシピ$/.test(text) && isParentGroup) {
           const dayName = text.charAt(0);
+          console.log(`[webhook] recipe request: day=${dayName}`);
           const weekKey = getWeekKey(new Date());
           const plan = await storage.getPlan(weekKey);
           if (!plan) {
@@ -370,6 +372,10 @@ app.post('/api/webhook', async (req, res) => {
               await replyLineMessage(replyToken, `${dayName}曜は夕食なしです。`);
             }
           }
+        } else if (/レシピ/.test(text) && isParentGroup) {
+          // フォールバック：レシピを含むがパターンにマッチしなかった場合
+          console.log(`[webhook] recipe fallback: "${text}"`);
+          await replyLineMessage(replyToken, `⚠ レシピの問い合わせ形式:\n・「レシピ」→ 今日のレシピ\n・「○曜のレシピ」→ 指定日のレシピ\n例：「月曜のレシピ」「火のレシピ」`);
         } else if (text === 'ヘルプ' || text === 'help') {
           if (isParentGroup) {
             await replyLineMessage(replyToken,
