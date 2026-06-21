@@ -780,11 +780,6 @@ function renderDetail() {
 // Input helpers
 let tempSchedule = {};
 
-function initTempSchedule() {
-  const member = state.currentMember;
-  tempSchedule = JSON.parse(JSON.stringify(state.schedules[member] || {}));
-}
-
 function setDinner(day, value) {
   if (!tempSchedule[day]) tempSchedule[day] = {};
   if (tempSchedule[day].dinner === value) {
@@ -893,7 +888,13 @@ async function saveSettings() {
 
 function initTempSchedule() {
   const member = state.currentMember;
-  tempSchedule = JSON.parse(JSON.stringify(state.schedules[member] || {}));
+  const existing = state.schedules[member] || {};
+  tempSchedule = {};
+  DAYS.forEach(day => {
+    tempSchedule[day] = existing[day]
+      ? JSON.parse(JSON.stringify(existing[day]))
+      : { dinner: '', memo: '' };
+  });
 }
 
 loadWeek();

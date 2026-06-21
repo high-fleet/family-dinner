@@ -222,14 +222,17 @@ app.post('/api/schedule', async (req, res) => {
         }).join('\n');
       await sendLineMessage(`📝 ${member}が予定を更新しました\n\n${days}`);
 
-      // 全員入力完了チェック
+      // 全員入力完了チェック（全7日にyes/noが入っていれば完了）
       const allMembers = await storage.getMembers();
       const allSchedules = await storage.getWeek(weekKey);
       const completedMembers = allMembers.filter(m => {
         const s = allSchedules[m];
         if (!s) return false;
-        return DAYS.every(day => s[day] && (s[day].dinner === 'yes' || s[day].dinner === 'no'));
+        const filledDays = DAYS.filter(day => s[day] && (s[day].dinner === 'yes' || s[day].dinner === 'no'));
+        console.log(`[completion] ${m}: ${filledDays.length}/7 days filled`);
+        return filledDays.length === DAYS.length;
       });
+      console.log(`[completion] ${completedMembers.length}/${allMembers.length} members complete`);
 
       if (completedMembers.length === allMembers.length) {
         const summary = buildWeekMessage(allMembers, allSchedules, weekKey);
