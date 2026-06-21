@@ -251,7 +251,16 @@ app.post('/api/schedule', async (req, res) => {
         const nowJST = toJST(new Date());
         const isSpecialWeek = nowJST.getUTCDate() <= 7;
 
-        const plan = generateWeeklyPlan(dinnerCounts, isSpecialWeek);
+        // 前週のプランを取得して重複回避
+        const prevWeekSat = new Date(weekKey + 'T00:00:00+09:00');
+        prevWeekSat.setDate(prevWeekSat.getDate() - 7);
+        const prevWeekKey = prevWeekSat.toISOString().slice(0, 10);
+        const prevPlan = await storage.getPlan(prevWeekKey);
+        const lastWeekNames = prevPlan
+          ? prevPlan.menu.filter(m => m.recipe).map(m => m.recipe.name)
+          : [];
+
+        const plan = generateWeeklyPlan(dinnerCounts, isSpecialWeek, lastWeekNames);
         await storage.savePlan(weekKey, plan);
         await sendLineMessageToParents(buildMenuMessage(plan));
         await sendLineMessageToParents(buildShoppingMessage(plan));

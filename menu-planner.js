@@ -561,7 +561,7 @@ function pickRandom(arr) {
 
 function pickRandomExcluding(arr, excludeNames) {
   const filtered = arr.filter(r => !excludeNames.includes(r.name));
-  if (filtered.length === 0) return pickRandom(arr);
+  if (filtered.length === 0) return arr;
   return filtered;
 }
 
@@ -569,9 +569,10 @@ function pickRandomExcluding(arr, excludeNames) {
  * 1週間分のメニューを生成する
  * @param {Object} dinnerCounts - 各曜日の夕食人数 { '土': 4, '日': 3, ... }
  * @param {boolean} isSpecialWeek - 月1の特別メニュー週かどうか
+ * @param {string[]} lastWeekNames - 前週に使ったレシピ名の配列（重複回避用）
  * @returns {Object} { menu: [...], shoppingList: [...] }
  */
-function generateWeeklyPlan(dinnerCounts, isSpecialWeek = false) {
+function generateWeeklyPlan(dinnerCounts, isSpecialWeek = false, lastWeekNames = []) {
   const DAYS = ['土', '日', '月', '火', '水', '木', '金'];
   const usedNames = [];
   const menu = [];
@@ -613,7 +614,7 @@ function generateWeeklyPlan(dinnerCounts, isSpecialWeek = false) {
     }
 
     let recipe;
-    const available = (arr) => pickRandomExcluding(arr, usedNames);
+    const available = (arr) => pickRandomExcluding(arr, [...usedNames, ...lastWeekNames]);
 
     if (i === specialDayIndex) {
       const pool = available(RECIPES.special);
