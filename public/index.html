@@ -589,6 +589,9 @@ async function loadWeek() {
   state.schedules = data.schedules;
   updateWeekLabel();
   renderTabs();
+  if (state.currentTab.startsWith('input-')) {
+    initTempSchedule();
+  }
   renderView();
 }
 
